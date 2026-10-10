@@ -19,6 +19,15 @@ canvas{display:block}
 #hm{left:50%;top:50%;width:26px;height:26px;margin:-13px;opacity:0;transition:opacity .25s;font-size:26px;line-height:26px;text-align:center}
 #dmg{inset:0;background:radial-gradient(ellipse at center,transparent 40%,#c00 130%);opacity:0;transition:opacity .35s}
 #scope{inset:0;background:radial-gradient(circle at center,transparent 28vh,#000 28.3vh);display:none}
+#scope b{position:absolute;display:block;background:#050505}
+#scope .ln{left:50%;top:50%;width:56.6vh;height:56.6vh;margin:-28.3vh 0 0 -28.3vh;border-radius:50%;background:radial-gradient(circle at center,transparent 62%,#0003 86%,#000b 100%);box-shadow:inset 0 0 2.2vh #000}
+#scope .hx{left:calc(50% - 28.3vh);top:50%;width:56.6vh;height:1px;margin-top:-.5px;box-shadow:0 0 1px #fff5}
+#scope .vx{top:calc(50% - 28.3vh);left:50%;height:56.6vh;width:1px;margin-left:-.5px;box-shadow:0 0 1px #fff5}
+#scope .pl,#scope .pr{top:50%;height:5px;margin-top:-2.5px;width:19.3vh}
+#scope .pt,#scope .pb{left:50%;width:5px;margin-left:-2.5px;height:19.3vh}
+#scope .pl{left:calc(50% - 28.3vh)}#scope .pr{left:calc(50% + 9vh)}#scope .pt{top:calc(50% - 28.3vh)}#scope .pb{top:calc(50% + 9vh)}
+#scope .tk{width:1px;height:9px;margin:-4.5px 0 0 -.5px;top:50%}#scope .tv{height:1px;width:9px;margin:-.5px 0 0 -4.5px;left:50%}
+#scope .dot{left:50%;top:50%;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:#ff2a1a;box-shadow:0 0 4px 1px #ff2a1acc}
 #sb{top:20%;left:50%;transform:translateX(-50%);background:#000b;padding:14px 24px;display:none;font-size:15px;min-width:300px;white-space:pre}
 #buy{top:25%;left:20px;background:#000c;padding:14px 20px;display:none;font-size:15px;white-space:pre;line-height:1.7;border-left:4px solid var(--acc)}
 #dead{top:40%;width:100%;text-align:center;font-size:30px;display:none}
@@ -102,7 +111,7 @@ button:disabled{opacity:.45;cursor:wait}button[hidden]{display:none}
 <div id="loadstate" role="status">Arena wird geladen …<br>Grafikbibliotheken werden vorbereitet.</div>
 <div id="modelinspect"></div>
 <div class="h" id="info"></div><div class="h" id="feed"></div><div class="h" id="hp"></div><div class="h" id="am"></div>
-<div class="h" id="scope"></div><div class="h" id="cross"><i></i><i></i><i></i><i></i></div><div class="h" id="hm">✕</div><div class="h" id="dmg"></div><div class="h" id="cream"></div>
+<div class="h" id="scope"><b class="ln"></b><b class="hx"></b><b class="vx"></b><b class="pl"></b><b class="pr"></b><b class="pt"></b><b class="pb"></b><b class="tk" style="left:calc(50% - 6vh)"></b><b class="tk" style="left:calc(50% - 3vh)"></b><b class="tk" style="left:calc(50% + 3vh)"></b><b class="tk" style="left:calc(50% + 6vh)"></b><b class="tv" style="top:calc(50% + 3vh)"></b><b class="tv" style="top:calc(50% + 6vh)"></b><b class="dot"></b></div><div class="h" id="cross"><i></i><i></i><i></i><i></i></div><div class="h" id="hm">✕</div><div class="h" id="dmg"></div><div class="h" id="cream"></div>
 <div class="h" id="sb"></div><div class="h" id="buy"></div><div class="h" id="dead"></div>
 <div class="ov" id="msg"><h1>ARENA FPS</h1>
 <p id="hint">Deathmatch für 3–4 Freunde. <b>B</b> Waffen wählen · <b>Esc</b> Menü und Einstellungen. Alle Tasten sind frei belegbar (auch Mausrad).</p>
@@ -125,7 +134,7 @@ window.addEventListener('error',function(e){var el=document.getElementById('load
 const R=THREE,$=i=>document.getElementById(i);
 // ===== Einstellungen =====
 const COARSE=matchMedia('(pointer:coarse)').matches;
-const DEF={tc:-1,ts:1,aim:COARSE,fx:true,sens:2,fov:73.7,vol:.6,cap:0,fps:true,q:2,sh:true,dist:170,aa:true,xc:'#3dff7a',xs:7,bob:1,kb:{fwd:'KeyW',back:'KeyS',left:'KeyA',right:'KeyD',jump:'Space',crouch:'KeyC',walk:'ShiftLeft',fire:'Mouse0',scope:'Mouse2',reload:'KeyR',buy:'KeyB',score:'Tab',w1:'Digit1',w2:'Digit2',last:'KeyQ'}};
+const DEF={tc:-1,ts:1,aim:COARSE,fx:true,sens:2,fov:73.7,vol:.6,cap:0,fps:true,q:2,sh:true,dist:170,aa:true,xc:'#3dff7a',xs:7,bob:1,tr:2,zt:0,kb:{fwd:'KeyW',back:'KeyS',left:'KeyA',right:'KeyD',jump:'Space',crouch:'KeyC',walk:'ShiftLeft',fire:'Mouse0',scope:'Mouse2',reload:'KeyR',buy:'KeyB',score:'Tab',w1:'Digit1',w2:'Digit2',last:'KeyQ'}};
 const NAMES={fwd:'Vorwärts',back:'Rückwärts',left:'Links',right:'Rechts',jump:'Springen',crouch:'Ducken',walk:'Leise gehen',fire:'Feuer',scope:'Zielfernrohr',reload:'Nachladen',buy:'Kaufmenü',score:'Punktestand',w1:'Primärwaffe',w2:'Pistole',last:'Letzte Waffe'};
 if(COARSE){DEF.q=1;DEF.sh=true;DEF.aa=true;DEF.dist=140}
 let S=JSON.parse(JSON.stringify(DEF));
@@ -135,9 +144,11 @@ const EMBEDDED=location.protocol==='blob:'||location.protocol==='about:'||/langd
 // ===== Szene =====
 const scene=new R.Scene();scene.background=new R.Color(0x9db4c8);scene.fog=new R.Fog(0x9db4c8,45,S.dist);
 const cam=new R.PerspectiveCamera(S.fov,innerWidth/innerHeight,.05,300);cam.rotation.order='YXZ';scene.add(cam);
-const ren=new R.WebGLRenderer({antialias:S.aa,powerPreference:COARSE?'default':'high-performance'});ren.shadowMap.enabled=S.sh;ren.shadowMap.type=R.PCFSoftShadowMap;ren.outputEncoding=R.sRGBEncoding;ren.toneMapping=R.ACESFilmicToneMapping;ren.toneMappingExposure=1.05;document.body.prepend(ren.domElement);
+const ren=new R.WebGLRenderer({antialias:S.aa,powerPreference:COARSE?'default':'high-performance'});ren.shadowMap.enabled=S.sh;ren.shadowMap.type=R.PCFSoftShadowMap;ren.shadowMap.autoUpdate=false;document.body.prepend(ren.domElement);
 scene.add(new R.HemisphereLight(0xdde8f5,0x59503f,.9));
 const sun=new R.DirectionalLight(0xfff1d8,1.25);sun.position.set(30,50,20);sun.castShadow=S.sh;Object.assign(sun.shadow.camera,{left:-48,right:48,top:48,bottom:-48,near:1,far:120});sun.shadow.bias=-.0005;scene.add(sun);
+// Lights also illuminate layer 1 (first-person weapon, rendered in its own depth pass so it never clips into walls).
+scene.children.forEach(o=>{if(o.isLight)o.layers.enable(1)});
 function applyS(){ren.setPixelRatio([.75,Math.min(devicePixelRatio,1.5),Math.min(devicePixelRatio,2)][S.q]);ren.setSize(innerWidth,innerHeight);
  if(ren.shadowMap.enabled!==S.sh){ren.shadowMap.enabled=S.sh;sun.castShadow=S.sh;scene.traverse(o=>{if(o.material)o.material.needsUpdate=true})}
  const ms=[1024,2048,COARSE?2048:4096][S.q];if(sun.shadow.mapSize.x!==ms){sun.shadow.mapSize.set(ms,ms);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null}}
@@ -215,7 +226,7 @@ function enhanceGun(g,id,first,bx,cy,mt,mg,pl,wd){const w=WI[id],u=g.userData;u.
  g.traverse(o=>{if(o.isMesh){o.receiveShadow=!first;o.castShadow=!first&&o!==u.flash}});
 }
 function mkGun(id,vm){const w=WI[id],g=new R.Group(),c=w.c,u=g.userData,
- Mm=(co,m,r)=>detailedMat(co,m,r,m>.3?'metal':co===0x8a5528?'wood':'fabric'),
+ Mm=(co,m,r)=>detailedMat(co,m,r,m>.3?'metal':co===0x946137?'wood':'fabric'),
  mt=Mm(0x353a3f,.62,.39),mg=Mm(0x535a61,.72,.33),pl=Mm(0x242628,.03,.82),wd=Mm(0x946137,.02,.62),sv=Mm(0xc9cdd3,.85,.25),od=Mm(0x4d5a3a,.05,.78),
  bx=(a,b,cc,x,y,z,m,rx)=>{const o=new R.Mesh(bevelBox(a,b,cc),m||mt);o.position.set(x,y,z);if(rx)o.rotation.x=rx;o.castShadow=!vm;g.add(o);return o},
  cy=(r,l,x,y,z,m,r2)=>{const o=new R.Mesh(new R.CylinderGeometry(r2||r,r,l,vm?20:12),m||mt);o.rotation.x=Math.PI/2;o.position.set(x,y,z);o.castShadow=!vm;g.add(o);return o},
@@ -247,11 +258,11 @@ function mkGun(id,vm){const w=WI[id],g=new R.Group(),c=w.c,u=g.userData,
 function initEnvironment(){if(!R.PMREMGenerator)return;let texture=null,generator=null;try{
  const width=256,height=128,data=new Uint8Array(width*height*4),sunDir=new R.Vector3(30,50,20).normalize();
  for(let y=0;y<height;y++)for(let x=0;x<width;x++){const phi=(x/width-.5)*Math.PI*2,theta=y/height*Math.PI,dy=Math.cos(theta),dir=new R.Vector3(Math.sin(theta)*Math.sin(phi),dy,Math.sin(theta)*Math.cos(phi)),up=Math.max(0,dy),s=Math.pow(Math.max(0,dir.dot(sunDir)),1000),base=dy>0?[172-70*up,188-55*up,202-30*up]:[98,101,88],i=(y*width+x)*4;data[i]=Math.min(255,base[0]+s*150);data[i+1]=Math.min(255,base[1]+s*125);data[i+2]=Math.min(255,base[2]+s*95);data[i+3]=255}
- texture=new R.DataTexture(data,width,height,R.RGBAFormat);texture.mapping=R.EquirectangularReflectionMapping;texture.encoding=R.sRGBEncoding;texture.needsUpdate=true;generator=new R.PMREMGenerator(ren);const map=generator.fromEquirectangular(texture);scene.environment=map.texture;
+ texture=new R.DataTexture(data,width,height,R.RGBAFormat);texture.mapping=R.EquirectangularReflectionMapping;texture.needsUpdate=true;generator=new R.PMREMGenerator(ren);const map=generator.fromEquirectangular(texture);ENV=map.texture;
  }catch(e){console.warn('Environment reflection fallback:',e.message)}finally{texture?.dispose();generator?.dispose()}}
 function enhanceArena(){
  // Batch decorative hardware by material; original collision boxes are unchanged.
- const batches=new Map(),metal=detailedMat(0x6b726e,.55,.52,'metal'),dark=detailedMat(0x353b37,.2,.76,'metal'),timber=detailedMat(0x876a47,0,.92,'wood'),paint=detailedMat(0xc5a34b,0,.9,'metal');
+ const batches=new Map(),metal=detailedMat(0x7a807b,.3,.6,'metal'),dark=detailedMat(0x3a403c,.15,.78,'metal'),timber=detailedMat(0x876a47,0,.92,'wood'),paint=detailedMat(0xc5a34b,0,.9,'metal');
  function box(mat,w,h,d,x,y,z){if(!batches.has(mat))batches.set(mat,[]);batches.get(mat).push({s:[w,h,d],p:[x,y,z]})}
  for(const b of B){const w=b.x1-b.x0,d=b.z1-b.z0,h=b.y1-b.y0,x=(b.x0+b.x1)/2,z=(b.z0+b.z1)/2;
   if(h===3&&(w>8||d>8)){const longX=w>d;for(const sign of [-1,1]){box(metal,w,.065,.07,x,h-.04,z+sign*(d/2+.018));box(metal,.07,.065,d,x+sign*(w/2+.018),h-.04,z);box(dark,w,.07,.055,x,.1,z+sign*(d/2+.018));box(dark,.055,.07,d,x+sign*(w/2+.018),.1,z);
@@ -262,12 +273,11 @@ function enhanceArena(){
  for(const side of [-1,1]){for(let i=0;i<8;i++)box(paint,1.25,.004,.065,side*35,.006,-28+i*8);for(const z of [-12,12]){box(dark,1.1,.012,.58,side*34,.008,z);for(let i=0;i<10;i++)box(metal,.042,.018,.54,side*34-.48+i*.105,.018,z)}}
  for(const m of [...scene.children])if(m.geometry&&m.geometry.type==='CylinderGeometry'&&m.geometry.parameters.radiusTop===.38){for(const y of [.08,.25,.75,.95]){const ring=new R.Mesh(new R.TorusGeometry(.383,.012,6,24),metal);ring.rotation.x=Math.PI/2;ring.position.set(m.position.x,y,m.position.z);scene.add(ring)}box(dark,.13,.012,.06,m.position.x+.15,1.007,m.position.z)}
  for(const [mat,list] of batches){const mesh=new R.InstancedMesh(new R.BoxGeometry(1,1,1),mat,list.length),obj=new R.Object3D();list.forEach((r,i)=>{obj.position.set(...r.p);obj.scale.set(...r.s);obj.updateMatrix();mesh.setMatrixAt(i,obj.matrix)});mesh.castShadow=mesh.receiveShadow=true;mesh.instanceMatrix.needsUpdate=true;scene.add(mesh)}
- const signTex=cv((ctx,s)=>{ctx.fillStyle='#29332d';ctx.fillRect(0,0,s,s);ctx.fillStyle='#dcb05b';ctx.fillRect(8,8,s-16,12);ctx.fillRect(8,s-20,s-16,12);ctx.fillStyle='#eeeadd';ctx.font='bold 33px sans-serif';ctx.textAlign='center';ctx.fillText('TRAINING',s/2,105);ctx.font='bold 21px sans-serif';ctx.fillText('SECTOR 04',s/2,148);ctx.font='13px sans-serif';ctx.fillText('AUTHORIZED PERSONNEL',s/2,185)},256);signTex.encoding=R.sRGBEncoding;
+ const signTex=cv((ctx,s)=>{ctx.fillStyle='#29332d';ctx.fillRect(0,0,s,s);ctx.fillStyle='#dcb05b';ctx.fillRect(8,8,s-16,12);ctx.fillRect(8,s-20,s-16,12);ctx.fillStyle='#eeeadd';ctx.font='bold 33px sans-serif';ctx.textAlign='center';ctx.fillText('TRAINING',s/2,105);ctx.font='bold 21px sans-serif';ctx.fillText('SECTOR 04',s/2,148);ctx.font='13px sans-serif';ctx.fillText('AUTHORIZED PERSONNEL',s/2,185)},256);
  for(const side of [-1,1]){const sign=new R.Mesh(new R.PlaneGeometry(3,1.6),new R.MeshStandardMaterial({map:signTex,roughness:.9}));sign.position.set(0,3.4,side*39.97);if(side>0)sign.rotation.y=Math.PI;scene.add(sign)}
- for(const key of Object.keys(T)){T[key].encoding=R.sRGBEncoding;T[key].anisotropy=Math.min(8,ren.capabilities.getMaxAnisotropy())}
- fl.material.bumpMap=T.floor;fl.material.bumpScale=.018;
- scene.traverse(o=>{if(o.isMesh&&o.material&&o.material.map&&Object.values(T).includes(o.material.map)){o.material.bumpMap=o.material.map;o.material.bumpScale=o===fl?.018:.012;o.material.roughness=o.material.map===T.cont?.66:.93;o.material.metalness=o.material.map===T.cont?.28:0;o.material.needsUpdate=true}});
- sun.shadow.normalBias=.022;sun.shadow.radius=2;
+ // Original arena materials/colours are kept as before (classic lighting); only texture sharpness at grazing angles improves.
+ for(const key of Object.keys(T)){T[key].anisotropy=Math.min(8,ren.capabilities.getMaxAnisotropy())}
+ sun.shadow.normalBias=.02;
 }
 // ===== Spieler und Physik (Source-Werte) =====
 const MAXHP=200;const P={wet:0,blind:0,slip:0,lh:0,x:-34,y:0,z:-34,vx:0,vz:0,vy:0,yaw:0,pitch:0,pp:0,py:0,crouch:0,g:true,hp:MAXHP,alive:true,k:0,d:0,jp:0,h:1.8,rt:0,shots:0,cd:0,rl:0,eq:0,fe:0,sc:false,pri:'ak',sec:'glock',cur:'pri',prev:'sec',name:'Spieler '+(10+Math.random()*89|0),hue:Math.random()};
@@ -319,35 +329,43 @@ function bindRoom(){
  room.on('died',m=>{const d=m.data;feed(nameOf(d.by)+' \u25b8 '+nameOf(m.peer)+(d.hs?' (Kopf)':''));if(d.by===me()&&!m.isMe)P.k++})}
 // ===== Effekte, Ton, Viewmodel =====
 let ac;function snd(f,t,v,ty='square'){try{ac=ac||new AudioContext();if(ac.state=='suspended')ac.resume();const o=ac.createOscillator(),g=ac.createGain(),n=ac.currentTime;o.type=ty;o.frequency.setValueAtTime(f,n);o.frequency.exponentialRampToValueAtTime(Math.max(30,f*.3),n+t);g.gain.setValueAtTime(v*S.vol,n);g.gain.exponentialRampToValueAtTime(.001,n+t);o.connect(g);g.connect(ac.destination);o.start();o.stop(n+t)}catch(e){}}
-// Short, finite-lifetime tracer segments. Shared geometry is never disposed per shot.
-let fx=[];const TG=new R.CylinderGeometry(.0035,.0035,1,6).rotateX(Math.PI/2);
+// Glowing tracer streaks: constant on-screen width (visible at any distance), travel to the impact, then disappear.
+// Strength levels: 0 off, 1 subtle, 2 normal, 3 strong. Lifetime is always (distance + streak) / speed, max. ~0.35 s.
+let fx=[];
+const TRL=[null,{px:2.2,o:.5},{px:3.2,o:.85},{px:4.4,o:1}],TRU={uPa:{value:.0014},uPx:{value:3.2}};
+const TRG=(()=>{const g=new R.BufferGeometry();g.setAttribute('position',new R.Float32BufferAttribute(new Array(12).fill(0),3));g.setAttribute('tr',new R.Float32BufferAttribute([0,-1,1,-1,1,1,0,1],2));g.setIndex([0,1,2,0,2,3]);return g})();
+const TR_VS='uniform vec3 uA,uB;uniform float uW,uPx,uPa;attribute vec2 tr;varying vec2 vT;void main(){vec3 p=mix(uA,uB,tr.x);vec4 mv=viewMatrix*vec4(p,1.);vec3 a=(viewMatrix*vec4(uA,1.)).xyz,b=(viewMatrix*vec4(uB,1.)).xyz;vec3 s=cross(b-a,mv.xyz);float l=length(s);s=l>1e-7?s/l:vec3(0.,1.,0.);float w=max(uW,max(-mv.z,.05)*uPa*uPx)*.5;mv.xyz+=s*tr.y*w;gl_Position=projectionMatrix*mv;vT=tr;}';
+const TR_FS='uniform vec3 uC;uniform float uO;varying vec2 vT;void main(){float s=1.-abs(vT.y);float core=pow(s,2.4);float a=(core+s*s*.3)*uO*smoothstep(0.,.9,vT.x);gl_FragColor=vec4(mix(uC,vec3(1.,.97,.9),core*.6),a);}';
 function dropTracer(i){const f=fx[i];scene.remove(f.l);f.l.material.dispose();fx.splice(i,1)}
 function tracer(a,b,col){
+ const lv=TRL[S.tr];if(!lv)return;
  if(!a||!b||![a.x,a.y,a.z,b.x,b.y,b.z].every(Number.isFinite))return;
- const len=a.distanceTo(b);if(len<.04)return;
+ const len=a.distanceTo(b);if(len<.3)return;
  while(fx.length>=96)dropTracer(0);
- const special=col!==undefined&&col!==null,c=col==='rand'?new R.Color().setHSL(Math.random(),.8,.55):(col||0xd9b77b);
- const mat=new R.MeshBasicMaterial({color:c,transparent:true,opacity:special?.48:.22,depthWrite:false,depthTest:true});
- const m=new R.Mesh(TG,mat),dir=b.clone().sub(a).normalize(),life=Math.min(.15,len/950+.018);
- m.position.copy(a);m.scale.set(special?1.6:1,special?1.6:1,.01);m.quaternion.setFromUnitVectors(new R.Vector3(0,0,1),dir);scene.add(m);
- fx.push({l:m,a:a.clone(),dir,t:0,len,life,opacity:mat.opacity,speed:950,tail:special?1.4:.8});
+ const c=col==='rand'?new R.Color().setHSL(Math.random(),.9,.6):new R.Color(col||0xffc46b);
+ const mat=new R.ShaderMaterial({uniforms:{uA:{value:a.clone()},uB:{value:a.clone()},uC:{value:c},uO:{value:lv.o},uW:{value:.002},uPx:TRU.uPx,uPa:TRU.uPa},vertexShader:TR_VS,fragmentShader:TR_FS,transparent:true,depthWrite:false,depthTest:true,blending:R.AdditiveBlending,fog:false});
+ const m=new R.Mesh(TRG,mat);m.frustumCulled=false;m.renderOrder=5;scene.add(m);
+ const streak=Math.min(5,1.2+len*.35),speed=Math.min(360,(len+streak)/.1);
+ fx.push({l:m,a:a.clone(),dir:b.clone().sub(a).normalize(),t:0,len,speed,streak,life:(len+streak)/speed,o:lv.o});
 }
-function stepTracers(dt){for(let i=fx.length-1;i>=0;i--){const f=fx[i];f.t+=dt;
- if(f.t>=f.life){dropTracer(i);continue}
- const head=Math.min(f.len,f.t*f.speed),tail=Math.max(0,Math.min(f.len,f.t*f.speed-f.tail));
- if(head-tail<.001){f.l.visible=false;continue}
- f.l.visible=true;f.l.position.copy(f.a).addScaledVector(f.dir,(head+tail)/2);f.l.scale.z=head-tail;
- f.l.material.opacity=f.opacity*Math.pow(Math.max(0,1-f.t/f.life),.65);
-}}
-function muzzleWorld(){if(VG){cam.updateMatrixWorld(true);return VG.localToWorld(new R.Vector3(0,.012,VG.userData.mz||-.55))}return cam.position.clone()}
+function stepTracers(dt){
+ const lv=TRL[S.tr];TRU.uPx.value=lv?lv.px:0;TRU.uPa.value=2*Math.tan(cam.fov*Math.PI/360)/Math.max(1,innerHeight);
+ for(let i=fx.length-1;i>=0;i--){const f=fx[i];f.t+=dt;
+  if(!lv||f.t>=f.life){dropTracer(i);continue}
+  const run=f.t*f.speed,head=Math.min(f.len,run),tail=Math.min(f.len,Math.max(0,run-f.streak)),u=f.l.material.uniforms;
+  u.uA.value.copy(f.a).addScaledVector(f.dir,tail);u.uB.value.copy(f.a).addScaledVector(f.dir,head);
+  u.uO.value=f.o*(head>=f.len?Math.max(0,(f.len-tail)/f.streak):1);
+ }}
+// Tracer origin: weapon muzzle; when scoped the weapon is hidden, so start just below the scope centre.
+function muzzleWorld(){cam.updateMatrixWorld(true);if(P.sc||!VG)return cam.localToWorld(new R.Vector3(0,-.07,-.3));return VG.localToWorld(new R.Vector3(0,.012,VG.userData.mz||-.55))}
 function disposeModel(root,keep=[]){const geos=new Set(),mats=new Set();root.traverse(o=>{if(keep.includes(o))return;if(o.geometry)geos.add(o.geometry);if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>mats.add(m))});geos.forEach(g=>g.dispose());mats.forEach(m=>m.dispose())}
 const vm=new R.Group();cam.add(vm);let VG=null,mf=new R.Mesh(new R.SphereGeometry(.06,6,5),new R.MeshBasicMaterial({color:0xffcc66})),V={kick:0,eq:1,bob:0,sx:0,sy:0,ls:-9};mf.visible=false;
-function setGun(){if(VG){VG.remove(mf);vm.remove(VG);disposeModel(VG)}VG=mkGun(P[P.cur],true);const L=VG.userData;mf.position.set(0,.02,L.mz||-.55);VG.add(mf);vm.add(VG);V.eq=1;P.eq=.45;P.rl=0;P.sc=false;mf.visible=false}
+function setGun(){if(VG){VG.remove(mf);vm.remove(VG);disposeModel(VG)}VG=mkGun(P[P.cur],true);const L=VG.userData;mf.position.set(0,.02,L.mz||-.55);VG.add(mf);vm.add(VG);VG.traverse(o=>o.layers.set(1));mf.layers.set(1);V.eq=1;P.eq=.45;P.rl=0;P.sc=false;P.zt=false;mf.visible=false}
 function hurt(n,from){P.hp-=n;P.lh=0;$('dmg').style.opacity=.9;setTimeout(()=>$('dmg').style.opacity=0,120);snd(90,.2,.15);
- if(P.hp<=0&&P.alive){P.alive=false;P.d++;P.rt=3;room?.emit('died',{by:from})}}
+ if(P.hp<=0&&P.alive){P.alive=false;P.sc=false;P.zt=false;P.d++;P.rt=3;room?.emit('died',{by:from})}}
 function respawn(){let best=SP[0],bd=-1;for(const s of SP){let m=1e9;for(const [,r] of M)m=Math.min(m,Math.hypot(r.m.position.x-s[0],r.m.position.z-s[1]));if(m>bd||bd<0){bd=m;best=s}}
- Object.assign(P,{x:best[0],z:best[1],y:0,vx:0,vz:0,vy:0,hp:MAXHP,slip:0,blind:0,wet:0,alive:true,rl:0,pp:0,py:0,yaw:Math.atan2(best[0],best[1])});refill()}
-function startReload(){const w=cw(),a=A[w.id];if(P.rl>0||a.m>=w.mag||a.r<=0||!P.alive)return;P.rl=w.rl;P.sc=false;V.rt=w.rl;setTimeout(()=>snd(420,.05,.1),w.rl*300);setTimeout(()=>snd(620,.06,.12),w.rl*700)}
+ Object.assign(P,{x:best[0],z:best[1],y:0,vx:0,vz:0,vy:0,hp:MAXHP,slip:0,blind:0,wet:0,alive:true,rl:0,pp:0,py:0,sc:false,zt:false,yaw:Math.atan2(best[0],best[1])});refill()}
+function startReload(){const w=cw(),a=A[w.id];if(P.rl>0||a.m>=w.mag||a.r<=0||!P.alive)return;P.rl=w.rl;P.sc=false;P.zt=false;V.rt=w.rl;setTimeout(()=>snd(420,.05,.1),w.rl*300);setTimeout(()=>snd(620,.06,.12),w.rl*700)}
 function shoot(w,a){a.m--;P.cd=60/w.rpm;if(PJ[w.id]){throwP(w);return}const pp0=P.pp,py0=P.py;const k=P.shots++,mv=Math.hypot(P.vx,P.vz)/MS;
  let sc=w.sp+(P.g?.012*Math.min(1,mv):.03)+.0005*Math.min(k,10);if(w.sc&&!P.sc)sc+=.06;if(w.sc&&P.sc&&mv<.1)sc=.0003;sc*=1-.3*P.crouch;if(isT())sc*=.6;
  P.pp+=w.rv*(k<10?1:.35)*(P.sc?.5:1);P.py+=(k>4?Math.sin(k*.9)*w.rv*.4:0)+(Math.random()-.5)*w.rv*.15;V.kick+=w.c==3?.07:.035;V.ls=performance.now();
@@ -370,9 +388,9 @@ const CI=['🔫','⚡','🎯','💥','🎉'],WH={cx:0,cy:0,p:null};
 const iconCache=new Map();
 function gunThumbnail(id){if(iconCache.has(id))return iconCache.get(id);let gun=null,target=null;
  const prev=ren.getRenderTarget(),oldShadow=ren.shadowMap.enabled,oldClear=ren.getClearColor(new R.Color()).clone(),oldAlpha=ren.getClearAlpha();
- try{gun=mkGun(id,false);const sc=new R.Scene();sc.environment=scene.environment;sc.add(gun,new R.HemisphereLight(0xf0f5ff,0x424842,1.8));const key=new R.DirectionalLight(0xffe6c2,2.6);key.position.set(2,3,-1);sc.add(key);
+ try{gun=mkGun(id,false);const sc=new R.Scene();sc.add(gun,new R.HemisphereLight(0xf0f5ff,0x424842,1.0));const key=new R.DirectionalLight(0xffe6c2,1.4);key.position.set(2,3,-1);sc.add(key);
  const box=new R.Box3().setFromObject(gun),center=box.getCenter(new R.Vector3()),size=box.getSize(new R.Vector3()),aspect=224/96,span=Math.max(size.z,size.x,.35)*.63,half=Math.max(size.y*.75,span/aspect,.12),camera=new R.OrthographicCamera(-half*aspect,half*aspect,half,-half,.01,20);
- camera.position.copy(center).add(new R.Vector3(3,.65,.7));camera.lookAt(center);target=new R.WebGLRenderTarget(224,96,{minFilter:R.LinearFilter,magFilter:R.LinearFilter});target.texture.encoding=R.sRGBEncoding;
+ camera.position.copy(center).add(new R.Vector3(3,.65,.7));camera.lookAt(center);target=new R.WebGLRenderTarget(224,96,{minFilter:R.LinearFilter,magFilter:R.LinearFilter});
  ren.shadowMap.enabled=false;ren.setRenderTarget(target);ren.setClearColor(0x000000,0);ren.clear();ren.render(sc,camera);const pixels=new Uint8Array(224*96*4);ren.readRenderTargetPixels(target,0,0,224,96,pixels);
  const c=document.createElement('canvas');c.width=224;c.height=96;const ctx=c.getContext('2d'),image=ctx.createImageData(224,96);for(let y=0;y<96;y++)image.data.set(pixels.subarray((95-y)*224*4,(96-y)*224*4),y*224*4);ctx.putImageData(image,0,0);const url=c.toDataURL('image/png');iconCache.set(id,url);return url;
  }catch(e){return ''}finally{ren.setRenderTarget(prev);ren.setClearColor(oldClear,oldAlpha);ren.shadowMap.enabled=oldShadow;if(target)target.dispose();if(gun)disposeModel(gun)}
@@ -393,6 +411,7 @@ function press(c){
  if(buy&&(/^Digit/.test(c)||c=='Escape')){buyKey(c);return}
  if(!playing||!locked())return;const K=S.kb;
  if(c==K.jump)P.jp=.12;if(c==K.fire)P.fe=.12;if(c==K.reload)startReload();if(c==K.buy){buy=buy?0:1;showBuy()}
+ if(c==K.scope&&S.zt&&!isT()&&cw().sc&&P.alive)P.zt=!P.zt;
  if(c==K.w1)equip('pri');if(c==K.w2)equip('sec');if(c==K.last)equip(P.prev)}
 addEventListener('keydown',e=>{if(e.defaultPrevented)return;if(!bindAct&&e.target?.matches?.('input,select,textarea'))return;if(e.repeat){if(locked())e.preventDefault();return}D.add(e.code);press(e.code);if(e.code==='Space'&&e.target?.closest?.('#wheel'))return;if(['Space','Tab','KeyB'].includes(e.code)&&locked()||bindAct)e.preventDefault()});
 addEventListener('keyup',e=>D.delete(e.code));
@@ -408,7 +427,7 @@ function buildSet(){const sl=(k,l,mn,mx,st)=>`<div class="r"><span>${l}</span><i
  se=(k,l,o)=>`<div class="r"><span>${l}</span><select data-k="${k}">${o.map(([v,t])=>`<option value="${v}" ${S[k]==v?'selected':''}>${t}</option>`).join('')}</select></div>`;
  $('setb').innerHTML=`<h1 style="text-align:center">EINSTELLUNGEN</h1><p style="font-size:12px;color:#b9c3b5">Änderungen gelten für diese Sitzung. Nach Neuladen werden die Standardwerte verwendet.</p><h3>Steuerung${isT()?'':' (Klick, dann Taste, Maustaste oder Mausrad)'}</h3>`+(isT()?'':Object.keys(NAMES).map(a=>`<div class="r"><span>${NAMES[a]}</span><button data-b="${a}" class="${bindAct==a?'on':''}">${bindAct==a?'Eingabe…':kn(S.kb[a])}</button></div>`).join(''))+
  se('tc','Touch-Steuerung (Handy/Tablet)',[[-1,'Automatisch'],[1,'An'],[0,'Aus']])+(isT()?sl('ts','Touch-Empfindlichkeit',.3,3,.05):sl('sens','Maus-Empfindlichkeit',.3,6,.05))+ck('aim','Aim-Assist (sanfte Zielhilfe)')+ck('fx','Grafik-Effekte (Shader)')+`<h3>Video</h3>`+sl('fov','Sichtfeld (vertikal, 73.7 = CS:GO)',55,100,1)+se('q','Qualität',[[0,'Niedrig'],[1,'Mittel'],[2,'Hoch']])+ck('sh','Schatten')+sl('dist','Sichtweite',60,300,10)+ck('aa','MSAA (WebGL2 + Shader-Effekte)')+se('cap','FPS-Limit',[[0,'Unbegrenzt'],[60,'60'],[120,'120'],[144,'144'],[240,'240']])+ck('fps','FPS-Anzeige')+
- `<h3>Spiel und Ton</h3>`+sl('vol','Lautstärke',0,1,.05)+sl('bob','Waffenwackeln',0,2,.1)+`<div class="r"><span>Fadenkreuz-Farbe</span><input type="color" data-k="xc" value="${S.xc}"></div>`+sl('xs','Fadenkreuz-Länge',3,16,1)+
+ `<h3>Spiel und Ton</h3>`+sl('vol','Lautstärke',0,1,.05)+sl('bob','Waffenwackeln',0,2,.1)+`<div class="r"><span>Fadenkreuz-Farbe</span><input type="color" data-k="xc" value="${S.xc}"></div>`+sl('xs','Fadenkreuz-Länge',3,16,1)+se('tr','Tracer (Leuchtspur)',[[0,'Aus'],[1,'Dezent'],[2,'Normal'],[3,'Kräftig']])+se('zt','Zoom (Zielfernrohr)',[[0,'Halten'],[1,'Umschalten']])+
  `<div style="text-align:center"><button id="rst">TASTEN ZURÜCKSETZEN</button><button id="bk">ZURÜCK</button></div>`}
 $('setb').addEventListener('input',e=>{const t=e.target,k=t.dataset.k;if(!k)return;S[k]=t.type=='checkbox'?t.checked:t.type=='color'?t.value:+t.value;save();applyS();if(k=='tc')buildSet()});
 $('setb').addEventListener('click',e=>{const t=e.target;if(t.dataset.b){bindAct=t.dataset.b;buildSet()}else if(t.id=='rst'){S.kb=Object.assign({},DEF.kb);save();buildSet()}else if(t.id=='bk'){bindAct=null;$('set').style.display='none';$('msg').style.display='flex'}});
@@ -523,8 +542,8 @@ function impact(e,k,w){if(k){burst(e,0xb0101a,14,4,.7);burst(e,0x6a0a10,8,2,.9);
  const m=new R.Mesh(new R.SphereGeometry(1,8,6),new R.MeshBasicMaterial({color:0xb8b2a6,transparent:true,opacity:.3}));m.position.copy(e).addScaledVector(n,.1);scene.add(m);bm.push({m,t:0,r:.35,du:.4,o:.3});decal(e,n,MH,.14)}
 function dnum(d,hs){const e=document.createElement('div');e.className='dn2';e.textContent=d;e.style.color=hs?'#ff4040':'#fff';e.style.marginLeft=(Math.random()*60-30)+'px';document.body.appendChild(e);setTimeout(()=>e.remove(),700)}
 let RT=null;const PS=new R.Scene(),PC=new R.OrthographicCamera(-1,1,1,-1,0,1),PM=new R.ShaderMaterial({uniforms:{t:{value:null}},depthTest:false,depthWrite:false,vertexShader:'varying vec2 u;void main(){u=uv;gl_Position=vec4(position.xy,0.,1.);}',
- fragmentShader:'varying vec2 u;uniform sampler2D t;void main(){vec2 c=u-.5;float r=dot(c,c);vec3 k=texture2D(t,u).rgb;float l=dot(k,vec3(.299,.587,.114));k=mix(vec3(l),k,1.03);k=mix(k,k*k*(3.-2.*k),.1);k*=1.-.18*smoothstep(.12,.55,r);k+=pow(max(l-.8,0.),2.)*.4;gl_FragColor=vec4(k,1.);}'}),pq=new R.Mesh(new R.PlaneGeometry(2,2),PM);pq.frustumCulled=false;PS.add(pq);
-function initFX(){if(RT){RT.dispose();RT=null}if(!S.fx)return;const v=new R.Vector2();ren.getDrawingBufferSize(v);RT=(S.aa&&ren.capabilities.isWebGL2&&R.WebGLMultisampleRenderTarget)?new R.WebGLMultisampleRenderTarget(v.x,v.y):new R.WebGLRenderTarget(v.x,v.y);if(RT.samples!==undefined)RT.samples=COARSE?2:4;RT.texture.encoding=R.sRGBEncoding;RT.texture.minFilter=RT.texture.magFilter=R.LinearFilter}
+ fragmentShader:'varying vec2 u;uniform sampler2D t;void main(){vec2 c=u-.5;float r=dot(c,c);vec3 k=texture2D(t,u).rgb;float l=dot(k,vec3(.299,.587,.114));k=mix(vec3(l),k,1.15);k=mix(k,k*k*(3.-2.*k),.3);k*=1.-.45*smoothstep(.12,.55,r);k+=pow(max(l-.8,0.),2.)*.4;gl_FragColor=vec4(k,1.);}'}),pq=new R.Mesh(new R.PlaneGeometry(2,2),PM);pq.frustumCulled=false;PS.add(pq);
+function initFX(){if(RT){RT.dispose();RT=null}if(!S.fx)return;const v=new R.Vector2();ren.getDrawingBufferSize(v);RT=(S.aa&&ren.capabilities.isWebGL2&&R.WebGLMultisampleRenderTarget)?new R.WebGLMultisampleRenderTarget(v.x,v.y):new R.WebGLRenderTarget(v.x,v.y);if(RT.samples!==undefined)RT.samples=COARSE?2:4;RT.texture.minFilter=RT.texture.magFilter=R.LinearFilter}
 $('wheel').addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-n]');if(t)buyKey(t.dataset.n=='x'?'Escape':'Digit'+t.dataset.n)});
 $('shopb').onclick=()=>{buy=1;showBuy()};
 const HUB='arenafps-lobbyhub-v1',hubR=new Map();let hubP=null,hubC=null,hubL=[],curCode='',isHost=false;
@@ -540,7 +559,7 @@ setInterval(()=>{if(hubC&&hubC.open)hubC.send({t:'list'});renLob();if(isHost&&cu
 hubInit();renLob();
 // ===== Gegner-Modelle mit Animation =====
 function mkPl(hue){
- const g=new R.Group(),U={},cl=detailedMat(new R.Color().setHSL(hue,.26,.35),0,.93),dk=detailedMat(0x252925,0,.85),sk=detailedMat(0xb89374,0,.82),vs=detailedMat(0x42493c,0,.88),steel=detailedMat(0x69716b,.65,.4,'metal');
+ const g=new R.Group(),U={},cl=detailedMat(new R.Color().setHSL(hue,.42,.34),0,.93),dk=detailedMat(0x252925,0,.85),sk=detailedMat(0xb89374,0,.82),vs=detailedMat(0x42493c,0,.88),steel=detailedMat(0x69716b,.65,.4,'metal');
  const pivot=(parent,x,y,z)=>{const p=new R.Group();p.position.set(x,y,z);parent.add(p);return p};
  U.lL=pivot(g,-.13,.85,0);U.lR=pivot(g,.13,.85,0);
  [U.lL,U.lR].forEach(l=>{ellipsoid(l,.11,.24,.12,0,-.22,0,cl);const knee=pivot(l,0,-.43,0);ellipsoid(knee,.10,.17,.10,0,-.13,0,cl);detailBox(knee,.14,.14,.055,0,0,-.105,dk);detailBox(knee,.19,.13,.29,0,-.33,-.055,dk);detailBox(knee,.20,.035,.3,0,-.395,-.055,dk);detailBox(l,.065,.15,.06,.1,-.23,.08,vs);l.userData.knee=knee});
@@ -576,18 +595,21 @@ $('previewb').onclick=()=>{if(previewRig)return;D.clear();buy=0;showBuy();previe
 $('previewclose').onclick=()=>{if(previewRig){scene.remove(previewRig.m);disposeModel(previewRig.m);previewRig=null}playing=previewPlaying;document.body.classList.remove('inspect');$('modelpreview').hidden=true;$('msg').style.display='flex'};
 function stepPreview(dt,now){if(!previewRig)return;const pose=$('previewpose').value,q=previewRig;vm.visible=false;q.sp=pose==='run'?3:0;q.ph+=dt*(pose==='run'?8:2);q.c=pose==='crouch'?1:0;poseRemote(q,{r:[0,pose==='aim'?Math.sin(now*.0012)*1.2:0],rl:pose==='reload'?(now%3600)/3600:0},dt,now);cam.position.set(-32.8,1.48,-34.5);cam.lookAt(new R.Vector3(-34,1.15,-37.1));skyM.position.copy(cam.position)}
 // ===== Hauptschleife =====
+// Two-pass render: world first, then weapon + arms on layer 1 with a cleared depth buffer (no wall clipping).
+function renderWorld(){ren.shadowMap.needsUpdate=true;cam.layers.set(0);ren.render(scene,cam);
+ if(vm.visible&&VG){const bg=scene.background;scene.background=null;ren.autoClear=false;ren.clearDepth();cam.layers.set(1);ren.render(scene,cam);scene.background=bg;ren.autoClear=true;cam.layers.set(0)}}
 let last=performance.now(),netT=0,sbT=0,lastR=0,fpsS=60;
 function loop(now){requestAnimationFrame(loop);if(S.cap&&now-lastR<1000/S.cap-.6)return;lastR=now;const dt=Math.min((now-last)/1000,.05);last=now;fpsS+=(1/Math.max(dt,.0005)-fpsS)*.05;
  if(playing){const w=cw(),a=A[w.id];
   if(P.alive){pm(dt);aimAssist(dt);P.cd-=dt;P.eq-=dt;P.fe-=dt;
    if(P.rl>0){P.rl-=dt;if(P.rl<=0){P.rl=0;const n=Math.min(w.mag-a.m,a.r);a.m+=n;a.r-=n}}
-   P.sc=!!(w.sc&&h('scope')&&P.rl<=0&&P.eq<=0);const af=h('fire');
+   P.sc=!!(w.sc&&(S.zt&&!isT()?P.zt:h('scope'))&&P.rl<=0&&P.eq<=0);const af=h('fire');
    if(!af&&P.fe<=0)P.shots=Math.max(0,P.shots-dt*6);const k=af?2.5:7;P.pp*=Math.exp(-dt*k);P.py*=Math.exp(-dt*k);
    const want=w.au?(af||P.fe>0):P.fe>0;
    if(want&&P.cd<=0&&P.rl<=0&&P.eq<=0&&!buy){if(a.m>0)shoot(w,a);else{snd(200,.03,.06);if(a.r>0)startReload();P.fe=0}}}
   else{P.rt-=dt;if(P.rt<=0)respawn()}}
  const w=cw(),a=A[w.id];const tf=P.sc?w.sc:S.fov;cam.fov+=(tf-cam.fov)*Math.min(1,dt*16);cam.updateProjectionMatrix();
- $('scope').style.display=P.sc&&cam.fov<w.sc+8?'block':'none';$('cross').style.display=P.sc?'none':'block';vm.visible=!P.sc&&P.alive;
+ const scopeOn=P.sc&&cam.fov<w.sc+8;$('scope').style.display=scopeOn?'block':'none';$('cross').style.display=scopeOn?'none':'block';vm.visible=!P.sc&&P.alive;
  // Viewmodel-Animation
  const sp=Math.hypot(P.vx,P.vz)/MS*(P.g?1:0);V.bob+=dt*(5+sp*5);V.kick*=Math.exp(-dt*16);V.eq=Math.max(0,V.eq-dt*2.6);V.sx*=Math.exp(-dt*8);V.sy*=Math.exp(-dt*8);
  if(VG&&playing){const u=P.rl>0?1-P.rl/(V.rt||1):0,rl=P.rl>0?Math.sin(u*Math.PI):0,mag=VG.userData.mag,bs=S.bob;
@@ -612,7 +634,7 @@ function loop(now){requestAnimationFrame(loop);if(S.cap&&now-lastR<1000/S.cap-.6
  $('info').textContent=(S.fps?Math.round(fpsS)+' FPS\n':'')+Math.round(Math.hypot(P.vx,P.vz)*39.37)+' u/s \u00b7 K '+P.k+' / T '+P.d+(room?' \u00b7 '+(M.size+1)+' Spieler':'');
  const sbv=h('score')&&playing;$('sb').style.display=sbv?'block':'none';
  if(sbv&&now-sbT>250){sbT=now;const rows=room?room.peers().filter(p=>p.presence.n).map(p=>p.presence):[{n:P.name,k:P.k,d:P.d}];rows.sort((x,y)=>y.k-x.k);$('sb').textContent='SPIELER'.padEnd(16)+'K   T\n'+rows.map(r=>String(r.n).padEnd(16)+String(r.k||0).padEnd(4)+(r.d||0)).join('\n')}
- tUI(now,w);stepP(dt);stepFx(dt);if(RT){ren.setRenderTarget(RT);ren.render(scene,cam);ren.setRenderTarget(null);PM.uniforms.t.value=RT.texture;ren.render(PS,PC)}else ren.render(scene,cam)}
+ tUI(now,w);stepP(dt);stepFx(dt);if(RT){ren.setRenderTarget(RT);renderWorld();ren.setRenderTarget(null);PM.uniforms.t.value=RT.texture;ren.render(PS,PC)}else renderWorld()}
 $('info').id='info';const fpsEl=document.createElement('div');fpsEl.id='fps';fpsEl.style.display='none';document.body.appendChild(fpsEl);
 enhanceArena();initEnvironment();applyS();setGun();playing=false;$('loadstate').hidden=true;if(EMBEDDED)$('net').textContent='Vorschau: Modelle und Einzelspieler. Multiplayer auf der veröffentlichten Spielseite.';requestAnimationFrame(loop);
 </script></body></html>
