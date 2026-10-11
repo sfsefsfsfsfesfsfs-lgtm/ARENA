@@ -347,7 +347,7 @@ function solveArm(a,target,rotation){
  const e=s.clone().addScaledVector(d,along).addScaledVector(bend,height);placeSegment(a.upper,s,e);placeSegment(a.lower,e,end);a.elbow.position.copy(e);a.hand.position.copy(end);a.hand.quaternion.copy(rotation);
 }
 function gripSpec(id){const w=WI[id],thrown=['banane','torte','granate'].includes(id);return{right:new R.Vector3(thrown?.02:0,thrown?-.025:-.075,thrown?-.18:.03),left:new R.Vector3(w.c===0?-.036:-.024,w.c===0?-.075:-.047,w.c===0?.025:w.c===1?-.25:w.c===2?-.39:thrown?-.21:id==='konfetti'?-.28:id==='wasser'?-.15:id==='rakete'?-.29:-.34),thrown}}
-function updateGunHands(g,reload=0){const u=g.userData;if(!u.arms)return;const spec=u.grips,right=spec.right.clone(),left=spec.left.clone();if(reload>0&&u.mag&&!spec.thrown){const t=R.MathUtils.smoothstep(reload,.12,.3)*(1-R.MathUtils.smoothstep(reload,.72,.94)),q=u.mag.position.clone();q.x-=.038;left.lerp(q,t)}solveArm(u.arms[1],right,new R.Quaternion());solveArm(u.arms[0],left,new R.Quaternion())}
+function updateGunHands(g,reload=0,ho){const u=g.userData;if(!u.arms)return;const spec=u.grips,right=spec.right.clone(),left=spec.left.clone();if(reload>0&&u.mag&&!spec.thrown){const t=R.MathUtils.smoothstep(reload,.12,.3)*(1-R.MathUtils.smoothstep(reload,.72,.94)),q=u.mag.position.clone();q.x-=.038;left.lerp(q,t)}if(ho&&!spec.thrown){right.add(ho.r);left.add(ho.l)}solveArm(u.arms[1],right,new R.Quaternion());solveArm(u.arms[0],left,new R.Quaternion())}
 function enhanceGun(g,id,first,bx,cy,mt,mg,pl,wd){const w=WI[id],u=g.userData;u.grips=gripSpec(id);u.id=id;
  if(w.c<4){
   // Machined receiver, fasteners, ejection port, grip stippling and sights.
@@ -767,24 +767,24 @@ const tpos=id=>{id=String(id);if(id===String(selfId()))return P.alive&&playing?{
 function tgts(b){const o=[];if(P.alive&&playing)o.push({id:String(selfId()),x:P.x,y:P.y,z:P.z,human:1});for(const [id,r] of M)if(!r.bot&&r.alive)o.push({id,x:r.m.position.x,y:r.m.position.y,z:r.m.position.z,human:1});for(const [id,q] of BOTS)if(id!==b.id&&q.alive)o.push({id,x:q.x,y:0,z:q.z});return o}
 function botSpawn(b){const en=[];if(P.alive)en.push(P);for(const r of M.values())if(!r.bot&&r.alive)en.push(r.m.position);let best=SP[0],bd=-1;for(const s of SP){let m=1e9;for(const q of en)m=Math.min(m,Math.hypot(q.x-s[0],q.z-s[1]));m+=Math.random()*6;if(m>bd){bd=m;best=s}}
  let x=best[0],z=best[1];for(let i=0;i<8;i++){const jx=best[0]+(Math.random()-.5)*5,jz=best[1]+(Math.random()-.5)*5;if(!bOv(jx,jz)){x=jx;z=jz;break}}
- Object.assign(b,{x,z,y:0,hp:MAXHP,alive:true,yaw:Math.atan2(x,z),th:0,cd:.7,wp:null,wpT:0,sd:1,sdT:1,burst:0,stuck:0,tg:null,c:0})}
+ Object.assign(b,{x,z,y:0,hp:MAXHP,alive:true,yaw:Math.atan2(x,z),th:0,cd:.7,wp:null,wpT:0,sd:1,sdT:1,burst:0,stuck:0,tg:null,c:0,am:30,rlT:0,rlp:0})}
 function botManage(){const want=Math.max(0,BOTMIN-humans());
  while(BOTS.size<want){let n=botSeq;do{n++}while(BOTS.has('bot:'+n));botSeq=n;const b={id:'bot:'+n,n:'Bot '+BNAMES[n%BNAMES.length],k:0,d:0,hue:Math.random(),g:BGUNS[n%3],c:0,pit:0,rt:0,alive:false};BOTS.set(b.id,b);botSpawn(b)}
  while(BOTS.size>want)BOTS.delete([...BOTS.keys()].pop())}
 function botDamage(o,by){const b=BOTS.get(o.to);if(!b||!b.alive||!(o.dm>0))return;b.hp-=Math.min(o.dm,400);if(b.hp<=0){b.alive=false;b.rt=3;b.d++;b.tg=null;bEmit('bdie',{id:b.id,by})}}
 function botEv(t,d){if(!d)return;
- if(t==='bshot'){if(!Array.isArray(d.o)||!Array.isArray(d.e)||![...d.o,...d.e].every(Number.isFinite))return;const o=new R.Vector3(...d.o),e=new R.Vector3(...d.e);tracer(o,e,WI.ak.tc);impact(e,d.k,WI.ak);snd(240,.1,Math.max(.01,.1-o.distanceTo(cam.position)*.003),'sawtooth')}
+ if(t==='bshot'){if(!Array.isArray(d.o)||!Array.isArray(d.e)||![...d.o,...d.e].every(Number.isFinite))return;const o=new R.Vector3(...d.o),e=new R.Vector3(...d.e);tracer(o,e,WI.ak.tc);const rr=M.get(d.i);if(rr){rr.recoil=Math.min(.18,(rr.recoil||0)+.05);rr.flashUntil=performance.now()+38}impact(e,d.k,WI.ak);snd(240,.1,Math.max(.01,.1-o.distanceTo(cam.position)*.003),'sawtooth')}
  else if(t==='bdie'){feed(nameOf(d.by)+' \u25b8 '+nameOf(d.id));if(d.by===selfId())P.k++;const b=BOTS.get(d.by);if(b&&botAuth())b.k++}}
 function botSync(m){if(m.isMe||botAuth()||!Array.isArray(m.data))return;const seen=new Set();
  for(const e of m.data){if(!Array.isArray(e)||typeof e[0]!=='string'||!e[0].startsWith('bot:')||![e[2],e[3],e[4]].every(Number.isFinite))continue;seen.add(e[0]);let b=BOTS.get(e[0]);if(!b){b={id:e[0],hue:Number.isFinite(e[10])?e[10]:.5};BOTS.set(e[0],b)}
-  Object.assign(b,{n:String(e[1]).slice(0,16),x:e[2],z:e[3],yaw:e[4],hp:+e[5]||0,k:+e[6]||0,d:+e[7]||0,alive:!!e[8],g:WI[e[9]]?e[9]:'ak',y:0})}
+  Object.assign(b,{n:String(e[1]).slice(0,16),x:e[2],z:e[3],yaw:e[4],hp:+e[5]||0,k:+e[6]||0,d:+e[7]||0,alive:!!e[8],g:WI[e[9]]?e[9]:'ak',rlp:Number.isFinite(e[11])?e[11]:0,y:0})}
  for(const id of [...BOTS.keys()])if(!seen.has(id))BOTS.delete(id)}
-function botShoot(b,tg){const dd=Math.hypot(tg.x-b.x,tg.z-b.z),o={x:b.x-Math.sin(b.yaw)*.5,y:1.4,z:b.z-Math.cos(b.yaw)*.5},eye={x:b.x,y:1.55,z:b.z},cx=tg.x,cy=tg.y+1.1,cz=tg.z;
+function botShoot(b,tg){b.am=(b.am==null?30:b.am)-1;if(b.am<=0)b.rlT=2.2;const dd=Math.hypot(tg.x-b.x,tg.z-b.z),o={x:b.x-Math.sin(b.yaw)*.5,y:1.4,z:b.z-Math.cos(b.yaw)*.5},eye={x:b.x,y:1.55,z:b.z},cx=tg.x,cy=tg.y+1.1,cz=tg.z;
  let hit=Math.random()<Math.max(.08,Math.min(.5,.6-dd*.013));const hs=hit&&Math.random()<.1;let ex=cx,ey=hs?tg.y+1.62:cy,ez=cz;
  if(!hit){ex+=(Math.random()-.5)*3;ey+=(Math.random()-.5)*1.4;ez+=(Math.random()-.5)*3}
  if(!los(eye,{x:cx,y:cy,z:cz}))hit=false;
  const d3=new R.Vector3(ex-o.x,ey-o.y,ez-o.z),L=d3.length()||1;d3.divideScalar(L);let t=L;for(const bb of B){const q=rb(o,d3,bb.x0,bb.x1,bb.y0,bb.y1,bb.z0,bb.z1);if(q>=0&&q<t){t=q;hit=false}}
- bEmit('bshot',{o:[+o.x.toFixed(2),+o.y.toFixed(2),+o.z.toFixed(2)],e:[+(o.x+d3.x*t).toFixed(2),+(o.y+d3.y*t).toFixed(2),+(o.z+d3.z*t).toFixed(2)],k:hit?1:0});
+ bEmit('bshot',{i:b.id,o:[+o.x.toFixed(2),+o.y.toFixed(2),+o.z.toFixed(2)],e:[+(o.x+d3.x*t).toFixed(2),+(o.y+d3.y*t).toFixed(2),+(o.z+d3.z*t).toFixed(2)],k:hit?1:0});
  if(!hit)return;const dm=Math.round(WI[b.g].dm*.8*(hs?2:1)),id=String(tg.id);
  if(id===String(selfId())){if(P.alive&&playing)gotHit({dm,k:[0,0,0]},b.id)}else if(id.startsWith('bot:'))botDamage({to:id,dm},b.id);else room?.emit('hit',{to:id,dm,b:b.id,k:[0,0,0]})}
 function simBot(b,dt){
@@ -800,19 +800,20 @@ function simBot(b,dt){
  let dy=want-b.yaw;dy=Math.atan2(Math.sin(dy),Math.cos(dy));b.yaw+=Math.max(-7*dt,Math.min(7*dt,dy));
  const ml=Math.hypot(mx,mz);if(ml>.01){const vx=mx/ml*sp*dt,vz=mz/ml*sp*dt;let moved=0;if(!bOv(b.x+vx,b.z)){b.x+=vx;moved+=Math.abs(vx)}if(!bOv(b.x,b.z+vz)){b.z+=vz;moved+=Math.abs(vz)}
   b.stuck=moved<sp*dt*.3?(b.stuck||0)+dt:0;if(b.stuck>.6){b.stuck=0;b.sd=-(b.sd||1);b.wp=null;b.sdT=1.5}}
- if(tg){b.cd=(b.cd||0)-dt;if(b.cd<=0&&Math.abs(dy)<.15){botShoot(b,tg);b.burst=(b.burst||0)+1;if(b.burst>=4+(Math.random()*4|0)){b.burst=0;b.cd=.6+Math.random()*.6}else b.cd=.2+Math.random()*.15}}}
+ if(b.rlT>0){b.rlT-=dt;b.rlp=Math.max(0,1-b.rlT/2.2);if(b.rlT<=0){b.am=30;b.rlp=0}}
+ if(tg){b.cd=(b.cd||0)-dt;if(b.cd<=0&&!(b.rlT>0)&&Math.abs(dy)<.15){botShoot(b,tg);b.burst=(b.burst||0)+1;if(b.burst>=4+(Math.random()*4|0)){b.burst=0;b.cd=.6+Math.random()*.6}else b.cd=.2+Math.random()*.15}}}
 function stepBots(dt,now){
  for(const [id,b] of BOTS){let r=M.get(id);if(!r){r={m:mkPl(b.hue),c:0,alive:true,ph:0,sp:0,w:null,bot:true};r.m.position.set(b.x,0,b.z);scene.add(r.m);M.set(id,r)}
   const k=1-Math.exp(-dt*18),dx=b.x-r.m.position.x,dz=b.z-r.m.position.z;r.m.position.x+=dx*k;r.m.position.z+=dz*k;r.m.position.y=0;
   let dy=b.yaw-r.m.rotation.y;dy=Math.atan2(Math.sin(dy),Math.cos(dy));r.m.rotation.y+=dy*k;r.c=0;r.alive=b.alive;deathAnim(r,dt);
   r.sp+=(Math.hypot(dx,dz)*18-r.sp)*Math.min(1,dt*8);r.ph+=dt*(2+r.sp*1.2);const U=r.m.userData;
   if(r.w!==b.g&&WI[b.g]){if(r.gm){U.hold.remove(r.gm);disposeModel(r.gm)}r.gm=mkGun(b.g,false);r.gm.scale.setScalar(.95);U.hold.add(r.gm);r.w=b.g}
-  poseRemote(r,{r:[b.yaw,0],rl:0},dt,now)}
+  poseRemote(r,{r:[b.yaw,0],rl:b.rlp||0},dt,now)}
  for(const [id,r] of M)if(r.bot&&!BOTS.has(id)){scene.remove(r.m);disposeModel(r.m);M.delete(id)}}
 function botsTick(dt,now){
  if(botAuth()&&playing){botMgr-=dt;if(botMgr<=0){botMgr=1;botManage()}
   for(const b of BOTS.values())simBot(b,dt);
-  if(room){botBC-=dt;if(botBC<=0){botBC=.066;room.emit('bots',[...BOTS.values()].map(b=>[b.id,b.n,+b.x.toFixed(2),+b.z.toFixed(2),+b.yaw.toFixed(2),Math.round(b.hp),b.k,b.d,b.alive?1:0,b.g,+b.hue.toFixed(2)]))}}}
+  if(room){botBC-=dt;if(botBC<=0){botBC=.066;room.emit('bots',[...BOTS.values()].map(b=>[b.id,b.n,+b.x.toFixed(2),+b.z.toFixed(2),+b.yaw.toFixed(2),Math.round(b.hp),b.k,b.d,b.alive?1:0,b.g,+b.hue.toFixed(2),+(b.rlp||0).toFixed(2)]))}}}
  stepBots(dt,now)}
 // ===== Grafik-Paket: Rauch, Funken, Hülsen, Mündungsfeuer, Todesanimation, Waffenanimationen =====
 function makeFlash(){const t=cv((x,s)=>{const g=x.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);g.addColorStop(0,'#fff');g.addColorStop(.25,'#ffd27a');g.addColorStop(1,'#ff9a2a00');x.fillStyle=g;x.fillRect(0,0,s,s);x.strokeStyle='#ffe9b0';x.lineWidth=5;x.lineCap='round';for(let i=0;i<4;i++){const a=i*Math.PI/2+.4;x.beginPath();x.moveTo(s/2,s/2);x.lineTo(s/2+Math.cos(a)*s*.48,s/2+Math.sin(a)*s*.48);x.stroke()}},128);
@@ -834,7 +835,7 @@ function impactFX(e,k,w){if(k||!S.smoke||e.distanceTo(cam.position)>70||Math.abs
  if(m.sd==='dust'&&!pl)for(let i=0;i<4;i++)puff(e,0xffc060,.07,.25+Math.random()*.15,(Math.random()-.5)*6,1+Math.random()*3,(Math.random()-.5)*6,0,true,14)}
 function boomSmoke(d){if(!S.smoke||((BOOM[d.k]||[0,1])[1]<=3))return;for(let i=0;i<8;i++)puff(new R.Vector3(d.x,d.y+.3,d.z),0x444444,1.2,1.4+Math.random(),(Math.random()-.5)*2,1+Math.random()*1.5,(Math.random()-.5)*2,2.5);
  for(let i=0;i<10;i++)puff(new R.Vector3(d.x,d.y+.2,d.z),0xffa040,.12,.5+Math.random()*.3,(Math.random()-.5)*9,2+Math.random()*5,(Math.random()-.5)*9,0,true,12)}
-function muzzleFX(w){if(!S.smoke||P.sc&&w.sc)return;puff(muzzleWorld(),0xbbbbbb,.12,.5,0,.4,0,3);if(w.c<4&&!w.tc)shell()}
+function muzzleFX(w){if(!(P.sc&&w.sc)){flashL.position.copy(muzzleWorld());flashL.intensity=1.8}if(!S.smoke||P.sc&&w.sc)return;puff(muzzleWorld(),0xbbbbbb,.12,.5,0,.4,0,3);if(w.c<4&&!w.tc)shell()}
 function shell(){while(SH.length>=18)scene.remove(SH.shift().m);const m=new R.Mesh(shG,shM);cam.updateMatrixWorld(true);m.position.copy(cam.localToWorld(new R.Vector3(.14,-.12,-.35)));m.rotation.set(Math.random()*3,Math.random()*3,Math.random()*3);scene.add(m);
  const r=new R.Vector3(1,0,0).applyQuaternion(cam.quaternion);SH.push({m,v:r.multiplyScalar(2.2+Math.random()).add(new R.Vector3(0,1.8+Math.random(),0)),t:0,sp:[Math.random()*20,Math.random()*20],b:0})}
 function stepShells(dt){for(let i=SH.length-1;i>=0;i--){const q=SH[i];q.t+=dt;if(q.t>4){scene.remove(q.m);SH.splice(i,1);continue}
@@ -844,18 +845,53 @@ function stepShells(dt){for(let i=SH.length-1;i>=0;i--){const q=SH[i];q.t+=dt;if
 function deathAnim(r,dt){const m=r.m;if(r.alive){if(r.dd){r.dd=0;m.rotation.x=0;m.rotation.order='XYZ'}m.visible=true;return}
  if(!r.dd)decal(new R.Vector3(m.position.x,0,m.position.z),new R.Vector3(0,1,0),MBL,.9);
  r.dd=(r.dd||0)+dt;m.rotation.order='YXZ';const t=Math.min(1,r.dd/.5);m.rotation.x=(1-Math.pow(1-t,3))*1.48;m.visible=r.dd<4.5}
-// Ego-Waffe: Sprint-Pose, Landung, Inspizieren (F), Ziehen mit Schwung, Nachladen in Stufen
-function vmExtra(dt,sp,w){const now=performance.now(),af=h('fire')||P.fe>0,sm=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)};
- const run=P.alive&&P.g&&!P.sc&&P.rl<=0&&P.eq<=0&&!af&&Math.hypot(P.vx,P.vz)>MS*.85&&(h('fwd')||TJ.fw>.5);
+// Ego-Waffe: Federphysik (Rückstoß, Trägheit, Landung), Abläufe je Waffentyp, Hände, Mündungslicht
+const flashL=new R.PointLight(0xffb060,0,7);flashL.layers.enable(1);scene.add(flashL);
+const mkSp=(k,c)=>({x:0,v:0,k,c}),WS={rx:mkSp(230,19),ry:mkSp(200,17),rz:mkSp(200,17),pz:mkSp(260,21),py:mkSp(200,17),dr:mkSp(90,9),ld:mkSp(130,12),lx:mkSp(70,10),lr:mkSp(70,10)};
+const stepSp=(q,t,dt)=>{const n=Math.max(1,Math.ceil(dt/.008)),hh=dt/n;for(let i=0;i<n;i++){q.v+=(-q.k*(q.x-t)-q.c*q.v)*hh;q.x+=q.v*hh}};
+const WK=id=>({scout:'bolt',awp:'bolt',nova:'pump',xm:'shot',m249:'lmg',r8:'rev'}[id])||['pistol','smg','rifle','heavy','fun'][WI[id].c];
+const KR={pistol:{pz:1.5,rx:3.5,ry:.6,rz:.8,eq:3.4,dr:.5},smg:{pz:.9,rx:1.6,ry:.5,rz:.6,eq:3,dr:.4},rifle:{pz:1.2,rx:2,ry:.8,rz:.7,eq:2.5,dr:.35},bolt:{pz:3.2,rx:6,ry:1.2,rz:1.4,eq:1.8,dr:-.3},pump:{pz:3,rx:5,ry:1,rz:1.2,eq:2.1,dr:.3},shot:{pz:3,rx:4.5,ry:1,rz:1.2,eq:2.1,dr:.3},lmg:{pz:1.5,rx:1.8,ry:1.4,rz:1.2,eq:1.6,dr:-.2},rev:{pz:2.4,rx:6,ry:.8,rz:1.2,eq:3,dr:.5},heavy:{pz:2,rx:3,ry:1,rz:1,eq:2,dr:0},fun:{pz:.8,rx:1.5,ry:.4,rz:.4,eq:3,dr:.3}};
+const eqRate=w=>KR[WK(w.id)].eq;
+const HO={l:new R.Vector3(),r:new R.Vector3()};V.ho=HO;
+function vmExtra(dt,sp,w){
+ const now=performance.now(),kind=WK(w.id),K=KR[kind],af=h('fire')||P.fe>0,
+ sm=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)},
+ bc=t=>{if(t<=0||t>=1)return[0,0,0,0];const l=sm(0,.2,t)*(1-sm(.8,1,t)),p=sm(.2,.5,t)*(1-sm(.5,.8,t));return[.03*l,.05*l,.09*p,l]};
+ HO.l.set(0,0,0);HO.r.set(0,0,0);
+ if(V.gref!==VG){V.gref=VG;WS.dr.x=1;WS.dr.v=0;V.lsSeen=V.ls}
+ // Schuss -> Rückstoß-Impuls auf die Federn
+ if(V.ls!==V.lsSeen){V.lsSeen=V.ls;if(!PJ[w.id]){const sg=Math.random()<.5?-1:1;WS.pz.v+=K.pz;WS.rx.v+=K.rx*(.85+Math.random()*.3);WS.ry.v+=K.ry*sg*Math.random();WS.rz.v+=K.rz*sg*(.5+Math.random()*.5);WS.py.v-=K.pz*.12}}
+ // Landung und Seitwärts-Trägheit
+ const yaw=P.yaw,vlat=P.vx*Math.cos(yaw)-P.vz*Math.sin(yaw),spd=Math.hypot(P.vx,P.vz);
+ if(P.g&&V.air){V.air=false;WS.ld.v-=Math.min(1.5,Math.abs(V.pvy||0)*.16)}if(!P.g)V.air=true;V.pvy=P.vy;
+ stepSp(WS.rx,0,dt);stepSp(WS.ry,0,dt);stepSp(WS.rz,0,dt);stepSp(WS.pz,0,dt);stepSp(WS.py,0,dt);stepSp(WS.dr,0,dt);stepSp(WS.ld,0,dt);
+ stepSp(WS.lx,Math.max(-.03,Math.min(.03,-vlat*.0035)),dt);stepSp(WS.lr,Math.max(-.06,Math.min(.06,-vlat*.006)),dt);
+ WS.rx.x=Math.max(-.1,Math.min(.22,WS.rx.x));WS.pz.x=Math.min(.09,WS.pz.x);
+ vm.position.x+=WS.lx.x;vm.position.y+=WS.ld.x+WS.py.x;vm.position.z+=WS.pz.x;
+ vm.rotation.x+=WS.rx.x+WS.dr.x*.7;vm.rotation.y+=WS.ry.x+WS.dr.x*.4;vm.rotation.z+=WS.rz.x+WS.lr.x+WS.dr.x*K.dr;
+ // Atmen im Stand
+ const still=1-Math.min(1,spd/1.5);vm.position.y+=Math.sin(now*.0013)*.0014*still;vm.rotation.x+=Math.sin(now*.0011+1)*.004*still;vm.rotation.z+=Math.sin(now*.0009)*.003*still;
+ // Sprint-Pose
+ const run=P.alive&&P.g&&!P.sc&&P.rl<=0&&P.eq<=0&&!af&&spd>MS*.85&&(h('fwd')||TJ.fw>.5);
  V.spr=(V.spr||0)+((run?1:0)-(V.spr||0))*Math.min(1,dt*9);
- if(V.pg===false&&P.g)V.land=.07;V.pg=P.g;V.land=(V.land||0)*Math.exp(-dt*9);
+ vm.position.x+=V.spr*.07;vm.position.y+=-V.spr*.07;vm.position.z+=V.spr*.02;vm.rotation.x+=V.spr*.5;vm.rotation.y+=-V.spr*.7;vm.rotation.z+=V.spr*.25;
+ // Inspizieren (F), je nach Waffentyp
  if(af||P.rl>0||P.eq>0||run||P.sc)V.insp=-9e9;
- const ins=Math.max(0,Math.min(1,(now-(V.insp||-9e9))/2400)),ik=ins>0&&ins<1?Math.sin(ins*Math.PI):0,sw=Math.sin(ins*Math.PI*2);
- vm.position.x+=V.spr*.07-ik*.1;vm.position.y+=-V.spr*.07-V.land+ik*.03;vm.position.z+=V.spr*.02;
- vm.rotation.x+=V.spr*.5;vm.rotation.y+=-V.spr*.7+ik*(1.1+sw*.5);vm.rotation.z+=V.spr*.25+ik*.45*sw;
- vm.rotation.z+=V.eq*.5*(w.c===2?1:-1);vm.rotation.y+=V.eq*.35;
- if(P.rl>0){const u=1-P.rl/(V.rt||1),tilt=sm(0,.2,u)-sm(.8,1,u),slap=Math.exp(-Math.pow((u-.52)*14,2)),ch=Math.exp(-Math.pow((u-.88)*16,2));
-  vm.rotation.z+=.35*tilt;vm.rotation.y+=-.22*tilt;vm.position.y+=-slap*.05;vm.rotation.x+=slap*.12-ch*.06;vm.position.z+=ch*.04}}
+ const ins=Math.max(0,Math.min(1,(now-(V.insp||-9e9))/2400)),ik=ins>0&&ins<1?Math.sin(ins*Math.PI):0,sw=Math.sin(ins*Math.PI*2),pi=kind==='pistol'||kind==='rev';
+ vm.position.x-=ik*.1;vm.position.y+=ik*.03;vm.rotation.y+=ik*((pi?1.5:1.1)+sw*.5);vm.rotation.z+=ik*(pi?.9:.45)*sw;vm.rotation.x+=ik*(pi?.3:0)*sw;
+ // Verschluss repetieren nach dem Schuss (Scharfschützengewehre), Pumpe mitbewegen (Schrotflinte)
+ if(kind==='bolt'&&P.rl<=0&&P.alive){const t=(now-V.ls)/1000;if(t<1.2){const b=bc((t-.3)/.65);HO.r.x+=b[0];HO.r.y+=b[1];HO.r.z+=b[2];vm.rotation.z-=b[3]*.12;vm.position.y-=b[3]*.01}}
+ const pu=VG&&VG.userData.pump;if(pu&&VG.userData.pumpBase&&P.rl<=0)HO.l.z+=pu.position.z-VG.userData.pumpBase.z;
+ // Nachladen: eigener Ablauf je Waffentyp
+ if(P.rl>0){const u=1-P.rl/(V.rt||1),tilt=sm(0,.18,u)-sm(.8,.98,u),slap=Math.exp(-Math.pow((u-.55)*13,2));
+  if(kind==='bolt'){vm.rotation.z-=.35*tilt;vm.rotation.y+=.15*tilt;vm.rotation.x+=.15*tilt;vm.position.y-=.03*tilt+slap*.03;const a=bc((u-.04)/.26),c=bc((u-.7)/.26);HO.r.x+=a[0]+c[0];HO.r.y+=a[1]+c[1];HO.r.z+=a[2]+c[2]}
+  else if(kind==='pump'||kind==='shot'){vm.rotation.z+=.4*tilt;vm.rotation.x+=.28*tilt;vm.rotation.y-=.2*tilt;vm.position.y-=.04*tilt;const win=sm(.1,.2,u)*(1-sm(.82,.9,u)),ph=Math.max(0,((u-.15)/.7*5)%1),rch=Math.sin(ph*Math.PI)*win;HO.l.x+=.03*rch;HO.l.y+=.05*rch;HO.l.z+=.27*rch;vm.position.y-=rch*.012}
+  else if(kind==='rev'){vm.rotation.z+=.8*tilt;vm.rotation.y-=.4*tilt;vm.rotation.x+=.35*tilt+slap*.1;vm.position.y-=.05*tilt+slap*.04;const rch=sm(.1,.22,u)*(1-sm(.72,.84,u));HO.l.y+=.04*rch;HO.l.z+=.15*rch}
+  else{const A={pistol:[.5,-.25,.28,-.03],smg:[.3,-.2,.2,-.02],rifle:[.32,-.22,.18,-.02],lmg:[.35,-.3,.45,-.06],heavy:[.3,-.2,.2,-.03],fun:[.2,-.1,.15,-.02]}[kind];
+   vm.rotation.z+=A[0]*tilt;vm.rotation.y+=A[1]*tilt;vm.rotation.x+=A[2]*tilt+slap*.1;vm.position.y+=A[3]*tilt-slap*.04;
+   if(kind==='pistol'){HO.r.z+=Math.sin(Math.PI*Math.max(0,Math.min(1,(u-.8)/.12)))*.045}
+   else if(kind!=='fun'){const reach=sm(.84,.9,u)-sm(.95,.99,u),pull=Math.sin(Math.PI*Math.max(0,Math.min(1,(u-.9)/.06)));HO.l.x+=.055*reach;HO.l.y+=.06*reach;HO.l.z+=.27*reach+.06*pull}}}
+ flashL.intensity*=Math.exp(-dt*40);if(flashL.intensity<.02)flashL.intensity=0}
 // ===== Hauptschleife =====
 // Two-pass render: world first, then weapon + arms on layer 1 with a cleared depth buffer (no wall clipping).
 let shF=0;function renderWorld(){if(++shF>=(COARSE?3:1)){shF=0;ren.shadowMap.needsUpdate=true}cam.layers.set(0);ren.render(scene,cam);
@@ -874,12 +910,12 @@ function loop(now){requestAnimationFrame(loop);if(S.cap&&now-lastR<1000/S.cap-.6
  const w=cw(),a=A[w.id];const tf=P.sc?w.sc:S.fov;cam.fov+=(tf-cam.fov)*Math.min(1,dt*16);cam.updateProjectionMatrix();
  const scopeOn=P.sc&&cam.fov<w.sc+8;$('scope').style.display=scopeOn?'block':'none';$('cross').style.display=scopeOn?'none':'block';vm.visible=!P.sc&&P.alive;
  // Viewmodel-Animation
- const sp=Math.hypot(P.vx,P.vz)/MS*(P.g?1:0);V.bob+=dt*(5+sp*5);V.kick*=Math.exp(-dt*16);V.eq=Math.max(0,V.eq-dt*2.6);V.sx*=Math.exp(-dt*8);V.sy*=Math.exp(-dt*8);
+ const sp=Math.hypot(P.vx,P.vz)/MS*(P.g?1:0);V.bob+=dt*(5+sp*5);V.kick*=Math.exp(-dt*16);V.eq=Math.max(0,V.eq-dt*eqRate(cw()));V.sx*=Math.exp(-dt*8);V.sy*=Math.exp(-dt*8);
  if(VG&&playing){const u=P.rl>0?1-P.rl/(V.rt||1):0,rl=P.rl>0?Math.sin(u*Math.PI):0,mag=VG.userData.mag,bs=S.bob;
   vm.position.set(.17+Math.sin(V.bob*.5)*.01*sp*bs+V.sx*-.3,-.2+Math.abs(Math.sin(V.bob))*.012*sp*bs+(1-Math.cos(V.eq*1.57))*-.35-rl*.1+V.sy*.3,-.4+V.kick);
   vm.rotation.set(V.kick*-1.6+rl*.9+V.sy*2,V.sx*3-rl*.35,-rl*.5+Math.sin(V.bob*.5)*.01*sp*bs);thAnim(w);vmExtra(dt,sp,w);
   if(mag){const o=u<.2?0:u<.4?(u-.2)/.2*.22:u<.6?.22:u<.8?.22*(1-(u-.6)/.2):0;mag.position.copy(VG.userData.magBase);mag.position.y-=P.rl>0?o:0;mag.visible=!(P.rl>0&&u>.35&&u<.5)}
-  const pu=VG.userData.pump;if(pu){const q=Math.min(1,(performance.now()-V.ls)/320);pu.position.z=VG.userData.pumpBase.z+(q<1?Math.sin(q*Math.PI)*.12:0)+(P.rl>0?Math.sin(u*Math.PI*6)*.05:0)}updateGunHands(VG,P.rl>0?u:0)}
+  const pu=VG.userData.pump;if(pu){const q=Math.min(1,(performance.now()-V.ls)/320);pu.position.z=VG.userData.pumpBase.z+(q<1?Math.sin(q*Math.PI)*.12:0)+(P.rl>0?Math.sin(u*Math.PI*6)*.05:0)}updateGunHands(VG,P.rl>0?u:0,V.ho)}
  const ey=P.y+P.h-.18;cam.position.set(P.x,P.alive?ey:P.y+.3,P.z);cam.rotation.set(P.pitch+P.pp,P.yaw+P.py,P.alive?(P.slip>0?Math.sin(P.slip*8)*.5:0):.7);skyM.position.copy(cam.position);stepPreview(dt,now);
  spr+=((Math.hypot(P.vx,P.vz)/MS*(P.g?10:20)+(h('fire')?6:0))-spr)*Math.min(1,dt*12);$('cross').style.setProperty('--g',(4+spr)+'px');
  // andere Spieler
